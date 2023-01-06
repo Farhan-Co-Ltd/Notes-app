@@ -1,517 +1,536 @@
 {
-	"id": "1a8ad6eb-256a-468e-9f0b-d1d59816d041",
-	"name": "Notes API Test",
-	"timestamp": "2023-01-04T10:17:40.121Z",
-	"collection_id": "0-b900a78a-ab4b-4cbf-9309-511a112e39d1",
-	"folder_id": 0,
-	"environment_id": "b69454a5-0463-426c-b067-b677095b6445",
-	"totalPass": 76,
-	"totalFail": 0,
-	"results": [
+	"info": {
+		"_postman_id": "99b5eff6-1f40-4b05-82d4-51b89fda0be2",
+		"name": "Notes API Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
 		{
-			"id": "456f91a0-fe3c-48d5-aa96-9bb083a54904",
 			"name": "Adding Notes",
-			"url": "http://localhost:5000/notes",
-			"time": 33,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {
-				"response status code should have 200 value": true,
-				"response Content-Type header should have application/json value": true,
-				"response body should an object": true,
-				"response body should have correct property and value": true,
-				"response body data should have noteId property and not equal to empty": true
-			},
-			"testPassFailCounts": {
-				"response status code should have 200 value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response Content-Type header should have application/json value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should an object": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should have correct property and value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body data should have noteId property and not equal to empty": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				33
-			],
-			"allTests": [
+			"event": [
 				{
-					"response status code should have 200 value": true,
-					"response Content-Type header should have application/json value": true,
-					"response body should an object": true,
-					"response body should have correct property and value": true,
-					"response body data should have noteId property and not equal to empty": true
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 200 value', () => {\r",
+							"   pm.response.to.have.status(201);\r",
+							"}); \r",
+							"\r",
+							"pm.test('response Content-Type header should have application/json value', () => {\r",
+							"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+							"}); \r",
+							"\r",
+							"pm.test('response body should an object', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body should have correct property and value', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.ownProperty('status');\r",
+							"    pm.expect(responseJson.status).to.equals('success');\r",
+							"    pm.expect(responseJson).to.ownProperty('message');\r",
+							"    pm.expect(responseJson.message).to.equals('Catatan berhasil ditambahkan');\r",
+							"    pm.expect(responseJson).to.ownProperty('data');\r",
+							"    pm.expect(responseJson.data).to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body data should have noteId property and not equal to empty', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    const { data } = responseJson;\r",
+							" \r",
+							"    pm.expect(data).to.ownProperty('noteId');\r",
+							"    pm.expect(data.noteId).to.not.equals('');\r",
+							" \r",
+							"    pm.environment.set('noteId', data.noteId);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
-			]
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"title\": \"Catatan A\",\r\n   \"tags\": [\"Android\", \"Web\"],\r\n   \"body\": \"Isi dari catatan A\"\r\n} ",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/notes",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
 		},
 		{
-			"id": "0dd6f152-92b5-418f-8b8f-4363325799a2",
 			"name": "Adding Notes with Bad Note Payload",
-			"time": 4,
-			"responseCode": {
-				"code": 400,
-				"name": "Bad Request"
-			},
-			"tests": {
-				"response status code should have 400 value": true,
-				"response Content-Type header should have application/json; charset=utf-8 value": true,
-				"response body should be an object": true,
-				"response body object should have correct property and value": true
-			},
-			"testPassFailCounts": {
-				"response status code should have 400 value": {
-					"pass": 6,
-					"fail": 0
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let badNotePayloads = pm.environment.get('badNotePayloads');  // ini akan bertipe Array\r",
+							" \r",
+							"if (!badNotePayloads || badNotePayloads.length === 0) {\r",
+							"    // inisialisasi dengan sejumlah note yang tidak sesuai\r",
+							"    badNotePayloads = [\r",
+							"        { tags: [\"Android\", \"Web\"], body: \"Isi dari catatan A\" },\r",
+							"        { title: 1, tags: [\"Android\", \"Web\"], body: \"Isi dari catatan A\" },\r",
+							"        { title: \"Catatan A\", body: \"Isi dari catatan A\" },\r",
+							"        { title: \"Catatan A\", tags: [1, \"2\"], body: \"Isi dari catatan A\" },\r",
+							"        { title: \"Catatan A\", tags: [\"Android\", \"Web\"] },\r",
+							"        { title: \"Catatan A\", tags: [\"Android\", \"Web\"], body: true }\r",
+							"    ]\r",
+							"}\r",
+							" \r",
+							"let currentBadNotePayload = badNotePayloads.shift();  // hapus index 0, geser sisanya\r",
+							"pm.environment.set('currentBadNotePayload', JSON.stringify(currentBadNotePayload));\r",
+							"pm.environment.set('badNotePayloads', badNotePayloads);"
+						],
+						"type": "text/javascript"
+					}
 				},
-				"response Content-Type header should have application/json; charset=utf-8 value": {
-					"pass": 6,
-					"fail": 0
-				},
-				"response body should be an object": {
-					"pass": 6,
-					"fail": 0
-				},
-				"response body object should have correct property and value": {
-					"pass": 6,
-					"fail": 0
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 400 value', () => {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							" \r",
+							"pm.test('response Content-Type header should have application/json; charset=utf-8 value', () => {\r",
+							"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+							"}); \r",
+							" \r",
+							"pm.test('response body should be an object', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.be.an('object');\r",
+							"});\r",
+							" \r",
+							"pm.test('response body object should have correct property and value', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+							"    pm.expect(responseJson.status).to.equals('fail');\r",
+							"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+							"    pm.expect(responseJson.message).to.be.ok;\r",
+							"})\r",
+							"\r",
+							"const repeatRequestUntilDatasetEmpty = () => {\r",
+							"    const badNotePayloads = pm.environment.get('badNotePayloads');\r",
+							"    if(badNotePayloads && badNotePayloads.length > 0) {\r",
+							"        postman.setNextRequest('Adding Notes with Bad Note Payload');\r",
+							"    }\r",
+							"}\r",
+							"repeatRequestUntilDatasetEmpty();"
+						],
+						"type": "text/javascript"
+					}
 				}
-			},
-			"times": [
-				7,
-				4,
-				6,
-				4,
-				6,
-				4
 			],
-			"allTests": [
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{currentBadNotePayload}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
 				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
-				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
-				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
-				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
-				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
+				"url": {
+					"raw": "localhost:5000/notes",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"notes"
+					]
 				}
-			]
+			},
+			"response": []
 		},
 		{
-			"id": "78efe833-e7e3-4ea0-a13e-de1bce4cbd95",
 			"name": "Getting All Notes",
-			"url": "http://localhost:5000/notes",
-			"time": 6,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {
-				"response status code should have 200 value": true,
-				"response Content-Type header should have application/json value": true,
-				"response body should an object": true,
-				"response body should have the correct property and value": true,
-				"response body data should have a notes array and contain at least 1 item": true
-			},
-			"testPassFailCounts": {
-				"response status code should have 200 value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response Content-Type header should have application/json value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should an object": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should have the correct property and value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body data should have a notes array and contain at least 1 item": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				6
-			],
-			"allTests": [
+			"event": [
 				{
-					"response status code should have 200 value": true,
-					"response Content-Type header should have application/json value": true,
-					"response body should an object": true,
-					"response body should have the correct property and value": true,
-					"response body data should have a notes array and contain at least 1 item": true
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 200 value', () => {\r",
+							"   pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test('response Content-Type header should have application/json value', () => {\r",
+							"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body should an object', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   pm.expect(responseJson).to.be.an('object');\r",
+							"}); \r",
+							"\r",
+							"pm.test('response body should have the correct property and value', () => {\r",
+							"  const responseJson = pm.response.json();\r",
+							"   pm.expect(responseJson).to.have.ownProperty('status');\r",
+							"   pm.expect(responseJson.status).to.equals('success');\r",
+							"   pm.expect(responseJson).to.have.ownProperty('data');\r",
+							"   pm.expect(responseJson.data).to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body data should have a notes array and contain at least 1 item', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   const { data } = responseJson;\r",
+							" \r",
+							"   pm.expect(data).to.have.ownProperty('notes');\r",
+							"   pm.expect(data.notes).to.be.an('array');\r",
+							"   pm.expect(data.notes).lengthOf.at.least(1);\r",
+							"}); "
+						],
+						"type": "text/javascript"
+					}
 				}
-			]
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/notes",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
 		},
 		{
-			"id": "784ba5f1-1fb5-49c8-a8a0-76cb4f606cc4",
 			"name": "Getting Specified Note",
-			"url": "http://localhost:5000/notes/EKYSTuwizKImyrtB",
-			"time": 5,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {
-				"response status code should have 200 value": true,
-				"response Content-Type header should have application/json value": true,
-				"response body should be an object": true,
-				"response body should have the correct property and value": true,
-				"response body data should contain note object": true,
-				"note object should contain correct value for id, title, body, and tags property": true
-			},
-			"testPassFailCounts": {
-				"response status code should have 200 value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response Content-Type header should have application/json value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should be an object": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should have the correct property and value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body data should contain note object": {
-					"pass": 1,
-					"fail": 0
-				},
-				"note object should contain correct value for id, title, body, and tags property": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				5
-			],
-			"allTests": [
+			"event": [
 				{
-					"response status code should have 200 value": true,
-					"response Content-Type header should have application/json value": true,
-					"response body should be an object": true,
-					"response body should have the correct property and value": true,
-					"response body data should contain note object": true,
-					"note object should contain correct value for id, title, body, and tags property": true
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 200 value', () => {\r",
+							"  pm.response.to.have.status(200);\r",
+							"}); \r",
+							"\r",
+							"pm.test('response Content-Type header should have application/json value', () => {\r",
+							"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body should be an object', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   pm.expect(responseJson).to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body should have the correct property and value', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							" \r",
+							"   pm.expect(responseJson).to.have.ownProperty('status');\r",
+							"   pm.expect(responseJson.status).to.equals('success');\r",
+							"   pm.expect(responseJson).to.have.ownProperty('data');\r",
+							"   pm.expect(responseJson.data).to.be.an('object');\r",
+							"}); \r",
+							"\r",
+							"pm.test('response body data should contain note object', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   const { data } = responseJson;\r",
+							" \r",
+							"   pm.expect(data).to.have.ownProperty('note');\r",
+							"   pm.expect(data.note).to.be.an('object');\r",
+							"}); \r",
+							"\r",
+							"pm.test('note object should contain correct value for id, title, body, and tags property', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   const { data: { note } } = responseJson;\r",
+							"\r",
+							"   const expectedId = pm.environment.get('noteId');\r",
+							"   const expectedTitle = 'Catatan A';\r",
+							"   const expectedTags = ['Android', 'Web'];\r",
+							"   const expectedBody = 'Isi dari catatan A';\r",
+							"\r",
+							"   pm.expect(note).to.have.ownProperty('id');\r",
+							"   pm.expect(note.id).to.equals(expectedId);\r",
+							"   pm.expect(note).to.have.ownProperty('title');\r",
+							"   pm.expect(note.title).to.equals(expectedTitle);\r",
+							"   pm.expect(note).to.have.ownProperty('tags');\r",
+							"   pm.expect(note.tags).to.eql(expectedTags);\r",
+							"   pm.expect(note).to.have.ownProperty('body');\r",
+							"   pm.expect(note.body).to.equals(expectedBody);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
-			]
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/notes/{{noteId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
+				}
+			},
+			"response": []
 		},
 		{
-			"id": "884ea77d-5c8b-48f6-8dda-a0d73460293e",
 			"name": "Update Note",
-			"url": "http://localhost:5000/notes/EKYSTuwizKImyrtB",
-			"time": 4,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {
-				"response status code should have 200 value": true,
-				"response Content-Type header should have application/json value": true,
-				"response body should be an object": true,
-				"response body should have correct property and value": true,
-				"when request the updated note": true,
-				"then the updated note should contain the latest data": true
-			},
-			"testPassFailCounts": {
-				"response status code should have 200 value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response Content-Type header should have application/json value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should be an object": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should have correct property and value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"when request the updated note": {
-					"pass": 1,
-					"fail": 0
-				},
-				"then the updated note should contain the latest data": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				4
-			],
-			"allTests": [
+			"event": [
 				{
-					"response status code should have 200 value": true,
-					"response Content-Type header should have application/json value": true,
-					"response body should be an object": true,
-					"response body should have correct property and value": true,
-					"when request the updated note": true,
-					"then the updated note should contain the latest data": true
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 200 value', () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test('response Content-Type header should have application/json value', () => {\r",
+							"   pm.expect(pm.response.headers.get('Content-Type')).to.equals(\"application/json; charset=utf-8\");\r",
+							"})\r",
+							"\r",
+							"pm.test('response body should be an object', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   pm.expect(responseJson).to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body should have correct property and value', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							" \r",
+							"   pm.expect(responseJson).to.have.ownProperty('status');\r",
+							"   pm.expect(responseJson.status).to.equals('success');\r",
+							"   pm.expect(responseJson).to.have.ownProperty('message');\r",
+							"   pm.expect(responseJson.message).to.equals('Catatan berhasil diperbarui');\r",
+							"});\r",
+							"\r",
+							"pm.test('when request the updated note', () => {\r",
+							"    const noteId = pm.environment.get('noteId');\r",
+							"    pm.sendRequest(`http://localhost:5000/notes/${noteId}`, (error, response) => {\r",
+							"        if(!error) {\r",
+							"            pm.test('then the updated note should contain the latest data', () => {\r",
+							"                const responseJson = response.json();\r",
+							"                const { data: { note } } = responseJson;\r",
+							" \r",
+							"                const expectedTitle = 'Catatan A Revised';\r",
+							"                const expectedTags = ['Android', 'Web'];\r",
+							"                const expectedBody = 'Isi dari Catatan A Revised';\r",
+							" \r",
+							"                pm.expect(note.title).to.equals(expectedTitle);\r",
+							"                pm.expect(note.tags).to.eql(expectedTags);\r",
+							"                pm.expect(note.body).to.equals(expectedBody);\r",
+							"            });\r",
+							"        }\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
-			]
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Catatan A Revised\",\r\n    \"tags\": [\"Android\", \"Web\"],\r\n    \"body\": \"Isi dari Catatan A Revised\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/notes/{{noteId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
+				}
+			},
+			"response": []
 		},
 		{
-			"id": "e548c315-b3b9-4e28-bcb8-0d0239bafcb2",
 			"name": "Update Note with Bad Note Payload",
-			"time": 5,
-			"responseCode": {
-				"code": 400,
-				"name": "Bad Request"
-			},
-			"tests": {
-				"response status code should have 400 value": true,
-				"response Content-Type header should have application/json; charset=utf-8 value": true,
-				"response body should be an object": true,
-				"response body object should have correct property and value": true
-			},
-			"testPassFailCounts": {
-				"response status code should have 400 value": {
-					"pass": 6,
-					"fail": 0
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 400 value', () => {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							" \r",
+							"pm.test('response Content-Type header should have application/json; charset=utf-8 value', () => {\r",
+							"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+							"}); \r",
+							" \r",
+							"pm.test('response body should be an object', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.be.an('object');\r",
+							"});\r",
+							" \r",
+							"pm.test('response body object should have correct property and value', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+							"    pm.expect(responseJson.status).to.equals('fail');\r",
+							"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+							"    pm.expect(responseJson.message).to.be.ok;\r",
+							"})\r",
+							"\r",
+							"const repeatRequestUntilDatasetEmpty = () => {\r",
+							"    const badNotePayloads = pm.environment.get('badNotePayloads');\r",
+							"    if(badNotePayloads && badNotePayloads.length > 0) {\r",
+							"        postman.setNextRequest('Update Note with Bad Note Payload');\r",
+							"    }\r",
+							"}\r",
+							"repeatRequestUntilDatasetEmpty();"
+						],
+						"type": "text/javascript"
+					}
 				},
-				"response Content-Type header should have application/json; charset=utf-8 value": {
-					"pass": 6,
-					"fail": 0
-				},
-				"response body should be an object": {
-					"pass": 6,
-					"fail": 0
-				},
-				"response body object should have correct property and value": {
-					"pass": 6,
-					"fail": 0
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let badNotePayloads = pm.environment.get('badNotePayloads');  // ini akan bertipe Array\r",
+							" \r",
+							"if (!badNotePayloads || badNotePayloads.length === 0) {\r",
+							"    // inisialisasi dengan sejumlah note yang tidak sesuai\r",
+							"    badNotePayloads = [\r",
+							"        { tags: [\"Android\", \"Web\"], body: \"Isi dari catatan A\" },\r",
+							"        { title: 1, tags: [\"Android\", \"Web\"], body: \"Isi dari catatan A\" },\r",
+							"        { title: \"Catatan A\", body: \"Isi dari catatan A\" },\r",
+							"        { title: \"Catatan A\", tags: [1, \"2\"], body: \"Isi dari catatan A\" },\r",
+							"        { title: \"Catatan A\", tags: [\"Android\", \"Web\"] },\r",
+							"        { title: \"Catatan A\", tags: [\"Android\", \"Web\"], body: true }\r",
+							"    ]\r",
+							"}\r",
+							" \r",
+							"const currentBadNotePayload = badNotePayloads.shift();  // hapus index 0, geser sisanya\r",
+							"pm.environment.set('currentBadNotePayload', JSON.stringify(currentBadNotePayload));\r",
+							"pm.environment.set('badNotePayloads', badNotePayloads);"
+						],
+						"type": "text/javascript"
+					}
 				}
-			},
-			"times": [
-				7,
-				6,
-				6,
-				5,
-				4,
-				5
 			],
-			"allTests": [
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{currentBadNotePayload}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
 				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
-				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
-				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
-				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
-				},
-				{
-					"response status code should have 400 value": true,
-					"response Content-Type header should have application/json; charset=utf-8 value": true,
-					"response body should be an object": true,
-					"response body object should have correct property and value": true
+				"url": {
+					"raw": "localhost:5000/notes/{{noteId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
 				}
-			]
+			},
+			"response": []
 		},
 		{
-			"id": "9eafc403-2ad3-422a-81a2-ce253b3710da",
 			"name": "Delete Notes",
-			"url": "http://localhost:5000/notes/EKYSTuwizKImyrtB",
-			"time": 6,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {
-				"response status code should have 200 value": true,
-				"response Content-Type header should have application/json value": true,
-				"response body should be an object": true,
-				"response body should have correct property and value": true,
-				"when request the updated note": true,
-				"the deleted note should be not found": true
-			},
-			"testPassFailCounts": {
-				"response status code should have 200 value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response Content-Type header should have application/json value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should be an object": {
-					"pass": 1,
-					"fail": 0
-				},
-				"response body should have correct property and value": {
-					"pass": 1,
-					"fail": 0
-				},
-				"when request the updated note": {
-					"pass": 1,
-					"fail": 0
-				},
-				"the deleted note should be not found": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				6
-			],
-			"allTests": [
+			"event": [
 				{
-					"response status code should have 200 value": true,
-					"response Content-Type header should have application/json value": true,
-					"response body should be an object": true,
-					"response body should have correct property and value": true,
-					"when request the updated note": true,
-					"the deleted note should be not found": true
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 200 value', () => {\r",
+							"   pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test('response Content-Type header should have application/json value', () => {\r",
+							"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8')\r",
+							"}); \r",
+							"\r",
+							"pm.test('response body should be an object', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							"   pm.expect(responseJson).to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body should have correct property and value', () => {\r",
+							"   const responseJson = pm.response.json();\r",
+							" \r",
+							"   pm.expect(responseJson).to.have.ownProperty('status');\r",
+							"   pm.expect(responseJson.status).to.equals('success');\r",
+							"   pm.expect(responseJson).to.have.ownProperty('message');\r",
+							"   pm.expect(responseJson.message).to.equals('Catatan berhasil dihapus');\r",
+							"}); \r",
+							"\r",
+							"pm.test('when request the updated note', () => {\r",
+							"    const noteId = pm.environment.get('noteId');\r",
+							"    pm.sendRequest(`http://localhost:5000/notes/${noteId}`, (error, response) => {\r",
+							"        if(!error) {\r",
+							"            pm.test('the deleted note should be not found', () => {\r",
+							"                pm.expect(response.code).to.equals(404);\r",
+							"                const responseJson = response.json();\r",
+							"                pm.expect(responseJson.status).to.equals('fail');\r",
+							"                pm.expect(responseJson.message).to.equals('Catatan tidak ditemukan');\r",
+							"            });\r",
+							"        }\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
-			]
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/notes/{{noteId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
+				}
+			},
+			"response": []
 		}
-	],
-	"count": 1,
-	"totalTime": 118,
-	"collection": {
-		"requests": [
-			{
-				"id": "456f91a0-fe3c-48d5-aa96-9bb083a54904",
-				"method": "POST"
-			},
-			{
-				"id": "0dd6f152-92b5-418f-8b8f-4363325799a2",
-				"method": "POST"
-			},
-			{
-				"id": "0dd6f152-92b5-418f-8b8f-4363325799a2",
-				"method": "POST"
-			},
-			{
-				"id": "0dd6f152-92b5-418f-8b8f-4363325799a2",
-				"method": "POST"
-			},
-			{
-				"id": "0dd6f152-92b5-418f-8b8f-4363325799a2",
-				"method": "POST"
-			},
-			{
-				"id": "0dd6f152-92b5-418f-8b8f-4363325799a2",
-				"method": "POST"
-			},
-			{
-				"id": "0dd6f152-92b5-418f-8b8f-4363325799a2",
-				"method": "POST"
-			},
-			{
-				"id": "78efe833-e7e3-4ea0-a13e-de1bce4cbd95",
-				"method": "GET"
-			},
-			{
-				"id": "784ba5f1-1fb5-49c8-a8a0-76cb4f606cc4",
-				"method": "GET"
-			},
-			{
-				"id": "884ea77d-5c8b-48f6-8dda-a0d73460293e",
-				"method": "PUT"
-			},
-			{
-				"id": "e548c315-b3b9-4e28-bcb8-0d0239bafcb2",
-				"method": "PUT"
-			},
-			{
-				"id": "e548c315-b3b9-4e28-bcb8-0d0239bafcb2",
-				"method": "PUT"
-			},
-			{
-				"id": "e548c315-b3b9-4e28-bcb8-0d0239bafcb2",
-				"method": "PUT"
-			},
-			{
-				"id": "e548c315-b3b9-4e28-bcb8-0d0239bafcb2",
-				"method": "PUT"
-			},
-			{
-				"id": "e548c315-b3b9-4e28-bcb8-0d0239bafcb2",
-				"method": "PUT"
-			},
-			{
-				"id": "e548c315-b3b9-4e28-bcb8-0d0239bafcb2",
-				"method": "PUT"
-			},
-			{
-				"id": "9eafc403-2ad3-422a-81a2-ce253b3710da",
-				"method": "DELETE"
-			}
-		]
-	}
+	]
 }
