@@ -6,7 +6,7 @@ const Hapi = require('@hapi/hapi')
 const notes = require('./api/notes')
 const ClientError = require('./exceptions/ClientError')
 const NotesService = require('./services/postgres/NotesService')
-const NotesValidator = require('./validator/notes')
+const NoteValidator = require('./validator/notes')
 
 // users
 const users = require('./api/users')
@@ -31,7 +31,7 @@ const init = async () => {
       plugin: notes,
       options: {
         service: notesService,
-        validator: NotesValidator
+        validator: NoteValidator
       }
     },
     {
