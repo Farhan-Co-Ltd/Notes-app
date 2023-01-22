@@ -16,19 +16,16 @@ class NotesService {
     const id = nanoid(16)
     const createdAt = new Date().toISOString()
     const updatedAt = createdAt
-
     const query = {
       text: 'INSERT INTO notes VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
       values: [id, title, body, tags, createdAt, updatedAt, owner]
     }
+    const { rows, rowCount } = await this._pool.query(query)
 
-    const result = await this._pool.query(query)
-
-    if (!result.rows[0].id) {
+    if (!rowCount) {
       throw new InvariantError('Catatan gagal ditambahkan')
     }
-
-    return result.rows[0].id
+    return rows[0].id
   }
 
   async getNotes (owner) {
@@ -39,8 +36,9 @@ class NotesService {
       GROUP BY notes.id`,
       values: [owner]
     }
-    const result = await this._pool.query(query)
-    return result.rows.map(mapDBToModel)
+    const { rows } = await this._pool.query(query)
+
+    return rows.map(mapDBToModel)
   }
 
   async getNoteById (id) {
@@ -51,13 +49,12 @@ class NotesService {
        WHERE notes.id = $1`,
       values: [id]
     }
-    const result = await this._pool.query(query)
+    const { rows, rowCount } = await this._pool.query(query)
 
-    if (!result.rowCount) {
+    if (!rowCount) {
       throw new NotFoundError('Catatan tidak ditemukan')
     }
-
-    return result.rows.map(mapDBToModel)[0]
+    return rows.map(mapDBToModel)[0]
   }
 
   async editNoteById (id, { title, tags, body }) {
@@ -66,9 +63,9 @@ class NotesService {
       text: 'UPDATE notes SET title = $1, body = $2, tags = $3, updated_at = $4 WHERE id = $5 RETURNING id',
       values: [title, body, tags, updated_at, id] // eslint-disable-line
     }
-    const result = await this._pool.query(query)
+    const { rowCount } = await this._pool.query(query)
 
-    if (!result.rowCount) {
+    if (!rowCount) {
       throw new NotFoundError('Gagal memperbarui catatan. Id tidak ditemukan')
     }
   }
@@ -78,10 +75,9 @@ class NotesService {
       text: 'DELETE FROM notes WHERE id = $1 RETURNING id',
       values: [id]
     }
+    const { rowCount } = await this._pool.query(query)
 
-    const result = await this._pool.query(query)
-
-    if (!result.rowCount) {
+    if (!rowCount) {
       throw new NotFoundError('Catatan gagal dihapus. Id tidak ditemukan')
     }
   }
@@ -91,13 +87,14 @@ class NotesService {
       text: 'SELECT * FROM notes WHERE id = $1',
       values: [id]
     }
+    const { rows, rowCount } = await this._pool.query(query)
 
-    const result = await this._pool.query(query)
-    if (!result.rowCount) {
+    if (!rowCount) {
       throw new NotFoundError('Catatan tidak ditemukan')
     }
 
-    const note = result.rows[0]
+    const note = rows[0]
+
     if (note.owner !== owner) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini')
     }

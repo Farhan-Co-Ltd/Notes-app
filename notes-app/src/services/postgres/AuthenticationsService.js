@@ -20,9 +20,9 @@ class AuthenticationsService {
       text: 'SELECT token FROM authentications WHERE token = $1',
       values: [token]
     }
+    const { rowCount } = await this._pool.query(query)
 
-    const result = await this._pool.query(query)
-    if (!result.rowCount) {
+    if (!rowCount) {
       throw new InvariantError('Refresh token tidak valid')
     }
   }

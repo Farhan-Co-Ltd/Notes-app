@@ -9,18 +9,16 @@ class CollaborationsService {
 
   async addCollaboration (noteId, userId) {
     const id = `collab-${nanoid(16)}`
-
     const query = {
       text: 'INSERT INTO collaborations VALUES($1, $2, $3) RETURNING id',
       values: [id, noteId, userId]
     }
+    const { rows, rowCount } = await this._pool.query(query)
 
-    const result = await this._pool.query(query)
-    if (!result.rowCount) {
+    if (!rowCount) {
       throw new InvariantError('Kolaborasi gagal ditambahkan')
     }
-
-    return result.rows[0].id
+    return rows[0].id
   }
 
   async deleteCollaboration (noteId, userId) {
@@ -28,9 +26,9 @@ class CollaborationsService {
       text: 'DELETE FROM collaborations WHERE note_id = $1 AND user_id = $2 RETURNING id',
       values: [noteId, userId]
     }
+    const { rowCount } = await this._pool.query(query)
 
-    const result = await this._pool.query(query)
-    if (!result.rowCount) {
+    if (!rowCount) {
       throw new InvariantError('Kolaborasi gagal dihapus')
     }
   }
@@ -40,9 +38,9 @@ class CollaborationsService {
       text: 'SELECT * FROM collaborations WHERE note_id = $1 AND user_id = $2',
       values: [noteId, userId]
     }
+    const { rowCount } = await this._pool.query(query)
 
-    const result = await this._pool.query(query)
-    if (!result.rowCount) {
+    if (!rowCount) {
       throw new InvariantError('Kolaborasi gagal diverifikasi')
     }
   }
