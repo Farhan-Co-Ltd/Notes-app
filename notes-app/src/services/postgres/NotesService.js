@@ -7,9 +7,10 @@ const NotFoundError = require('../../exceptions/NotFoundError')
 const { mapDBToModel } = require('../../utils')
 
 class NotesService {
-  constructor (collaborationsService) {
+  constructor (collaborationsService, cacheService) {
     this._pool = new Pool()
     this._collaborationsService = collaborationsService
+    this._cacheService = cacheService
   }
 
   async addNote ({ title, body, tags, owner }) {
@@ -25,20 +26,35 @@ class NotesService {
     if (!rowCount) {
       throw new InvariantError('Catatan gagal ditambahkan')
     }
+
+    await this._cacheService.delete(`notes:${owner}`)
+
     return rows[0].id
   }
 
   async getNotes (owner) {
-    const query = {
-      text: `SELECT notes.* FROM notes 
-      LEFT JOIN collaborations ON collaborations.note_id = notes.id
-      WHERE notes.owner = $1 OR collaborations.user_id = $1
-      GROUP BY notes.id`,
-      values: [owner]
-    }
-    const { rows } = await this._pool.query(query)
+    try {
+      // mendapatkan value lewat cache
+      const result = await this._cacheService.get(`notes:${owner}`)
 
-    return rows.map(mapDBToModel)
+      return JSON.parse(result)
+    } catch (error) {
+      // bila cahce bernilai false, maka diteruskan mendapatakna value lewat DB
+      const query = {
+        text: `SELECT notes.* FROM notes
+        LEFT JOIN collaborations ON collaborations.note_id = notes.id
+        WHERE notes.owner = $1 OR collaborations.user_id = $1
+        GROUP BY notes.id`,
+        values: [owner]
+      }
+
+      const { rows } = await this._pool.query(query)
+      const mappedResult = rows.map(mapDBToModel)
+
+      await this._cacheService.set(`notes:${owner}`, JSON.stringify(mappedResult))
+
+      return mappedResult
+    }
   }
 
   async getNoteById (id) {
@@ -63,11 +79,15 @@ class NotesService {
       text: 'UPDATE notes SET title = $1, body = $2, tags = $3, updated_at = $4 WHERE id = $5 RETURNING id',
       values: [title, body, tags, updated_at, id] // eslint-disable-line
     }
-    const { rowCount } = await this._pool.query(query)
+    const { rows, rowCount } = await this._pool.query(query)
 
     if (!rowCount) {
       throw new NotFoundError('Gagal memperbarui catatan. Id tidak ditemukan')
     }
+
+    const { owner } = rows[0]
+
+    await this._cacheService.delete(`notes:${owner}`)
   }
 
   async deleteNoteById (id) {
@@ -75,11 +95,15 @@ class NotesService {
       text: 'DELETE FROM notes WHERE id = $1 RETURNING id',
       values: [id]
     }
-    const { rowCount } = await this._pool.query(query)
+    const { rows, rowCount } = await this._pool.query(query)
 
     if (!rowCount) {
       throw new NotFoundError('Catatan gagal dihapus. Id tidak ditemukan')
     }
+
+    const { owner } = rows[0]
+
+    await this._cacheService.delete(`notes:${owner}`)
   }
 
   async verifyNoteOwner (id, owner) {
